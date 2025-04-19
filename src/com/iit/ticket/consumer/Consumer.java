@@ -3,9 +3,6 @@ package com.iit.ticket.consumer;
 import com.iit.ticket.model.Ticket;
 import com.iit.ticket.pool.TicketPool;
 import com.iit.ticket.util.PoolEntity;
-import com.iit.ticket.util.UtilMethods;
-
-import java.util.Random;
 
 public class Consumer implements PoolEntity {
 
@@ -26,17 +23,22 @@ public class Consumer implements PoolEntity {
             while (this.running) {
                 Ticket ticket = ticketPool.purchaseTicket();
                 if (ticket != null) {
-                    UtilMethods.debug("Consumer " + consumerId + " purchased: " + ticket);
+//                    UtilMethods.debug("Consumer " + consumerId + " purchased: " + ticket);
                 }
-                if (rate > 0){
+                if (rate > 0) {
                     Thread.sleep(1000 / rate);
-                }else {
+                } else {
                     Thread.sleep(1000);
                 }
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            System.out.println("Consumer " + consumerId + " thread interrupted");
         }
+    }
+
+    @Override
+    public int getRate() {
+        return this.rate;
     }
 
     @Override
@@ -46,7 +48,7 @@ public class Consumer implements PoolEntity {
 
     @Override
     public String getName() {
-        return consumerId+"";
+        return consumerId + "";
     }
 
     @Override

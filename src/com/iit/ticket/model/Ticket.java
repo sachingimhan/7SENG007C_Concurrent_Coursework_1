@@ -2,7 +2,7 @@ package com.iit.ticket.model;
 
 public class Ticket {
 
-    private int ticketId;;
+    private int ticketId;
     private double ticketPrice;
 
     public Ticket() {

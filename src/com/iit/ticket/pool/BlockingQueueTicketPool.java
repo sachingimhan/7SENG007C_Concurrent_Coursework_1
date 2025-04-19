@@ -5,10 +5,10 @@ import com.iit.ticket.model.Ticket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class BlockingQueueTicketPool implements TicketPool{
+public class BlockingQueueTicketPool implements TicketPool {
 
-    private BlockingQueue<Ticket> queue;
-    private int maxNumberOfTickets;
+    private final BlockingQueue<Ticket> queue;
+    private final int maxNumberOfTickets;
     private int soldTickets;
     private int totalTickets;
 

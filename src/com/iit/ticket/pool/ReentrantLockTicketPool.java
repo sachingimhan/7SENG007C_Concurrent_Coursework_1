@@ -13,7 +13,7 @@ public class ReentrantLockTicketPool implements TicketPool {
     private int maxNumberOfTickets = 0;
     private int soldTickets;
     private int totalTickets;
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
     Condition queueEmpty = lock.newCondition();
     Condition queueFull = lock.newCondition();
 
@@ -29,22 +29,22 @@ public class ReentrantLockTicketPool implements TicketPool {
                 queueFull.await();
             }
             boolean offer = queue.offer(ticket);
-            if (offer){
+            if (offer) {
                 totalTickets++;
                 queueEmpty.signalAll();
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
 
     @Override
     public Ticket purchaseTicket() {
-        try{
+        try {
             lock.lock();
-            while (queue.isEmpty()){
+            while (queue.isEmpty()) {
                 queueEmpty.await();
             }
             Ticket ticket = queue.poll();
@@ -66,7 +66,7 @@ public class ReentrantLockTicketPool implements TicketPool {
         try {
             lock.lock();
             return queue.size();
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -76,7 +76,7 @@ public class ReentrantLockTicketPool implements TicketPool {
         try {
             lock.lock();
             return soldTickets;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -86,7 +86,7 @@ public class ReentrantLockTicketPool implements TicketPool {
         try {
             lock.lock();
             return totalTickets;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }

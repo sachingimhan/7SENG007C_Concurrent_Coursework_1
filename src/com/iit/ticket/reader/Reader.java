@@ -2,7 +2,6 @@ package com.iit.ticket.reader;
 
 import com.iit.ticket.pool.TicketPool;
 import com.iit.ticket.util.PoolEntity;
-import com.iit.ticket.util.UtilMethods;
 
 public class Reader implements PoolEntity {
 
@@ -36,17 +35,21 @@ public class Reader implements PoolEntity {
                         .append(readerId)
                         .append(" - Total Number of Sold Tickets ")
                         .append(ticketPool.getSoldTickets());
-                UtilMethods.debug(builder.toString());
-                if (rate>0){
+//                UtilMethods.debug(builder.toString());
+                if (rate > 0) {
                     Thread.sleep(1000 / rate);
-                }else {
+                } else {
                     Thread.sleep(1000);
                 }
             }
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
             System.out.println("Reader " + readerId + " interrupted.");
         }
+    }
+
+    @Override
+    public int getRate() {
+        return this.rate;
     }
 
     @Override
@@ -56,7 +59,7 @@ public class Reader implements PoolEntity {
 
     @Override
     public String getName() {
-        return readerId+"";
+        return readerId + "";
     }
 
     @Override
