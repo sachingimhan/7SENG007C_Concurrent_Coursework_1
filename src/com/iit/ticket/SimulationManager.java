@@ -7,6 +7,7 @@ import com.iit.ticket.pool.SynchronizedTicketPool;
 import com.iit.ticket.pool.TicketPool;
 import com.iit.ticket.producer.Producer;
 import com.iit.ticket.reader.Reader;
+import com.iit.ticket.writer.Writer;
 
 import java.util.List;
 import java.util.Scanner;
@@ -20,6 +21,7 @@ public class SimulationManager {
     private static final List<Producer> producers = new CopyOnWriteArrayList<>();
     private static final List<Consumer> consumers = new CopyOnWriteArrayList<>();
     private static final List<Reader> readers = new CopyOnWriteArrayList<>();
+    private static final List<Writer> writers = new CopyOnWriteArrayList<>();
     private static final AtomicBoolean isRunning = new AtomicBoolean(true);
     private static TicketPool ticketPool;
 
@@ -82,8 +84,9 @@ public class SimulationManager {
             System.out.println("1. Consumer Menu");
             System.out.println("2. Producer Menu");
             System.out.println("3. Reader Menu");
-            System.out.println("4. Show Ticket Pool Status");
-            System.out.println("5. Exit");
+            System.out.println("4. Writer Menu");
+            System.out.println("5. Show Ticket Pool Status");
+            System.out.println("6. Exit");
 
             System.out.print("\nEnter your choice: ");
             int option = scanner.nextInt();
@@ -99,9 +102,12 @@ public class SimulationManager {
                     readerMenu();
                     break;
                 case 4:
-                    showPoolStatus();
+                    writerMenu();
                     break;
                 case 5:
+                    showPoolStatus();
+                    break;
+                case 6:
                     exit();
                     return;
                 default:
@@ -211,6 +217,43 @@ public class SimulationManager {
                     break;
                 case 4:
                     setReaderRate();
+                    break;
+                case 5:
+                    backToMain = true;
+                    break;
+                default:
+                    System.out.println("Invalid option! Please try again.");
+            }
+        }
+    }
+
+    private static void writerMenu() {
+        boolean backToMain = false;
+
+        while (!backToMain) {
+            System.out.println("\nWriter Menu");
+            System.out.println("-----------");
+            System.out.println("1. Add Writer");
+            System.out.println("2. Remove Writer");
+            System.out.println("3. List Writers");
+            System.out.println("4. Set Writer Rate");
+            System.out.println("5. Back to Main Menu");
+
+            System.out.print("\nEnter your choice: ");
+            int option = scanner.nextInt();
+
+            switch (option) {
+                case 1:
+                    addWriter();
+                    break;
+                case 2:
+                    removeWriter();
+                    break;
+                case 3:
+                    listWriters();
+                    break;
+                case 4:
+                    setWriterRate();
                     break;
                 case 5:
                     backToMain = true;
@@ -569,6 +612,122 @@ public class SimulationManager {
         }
     }
 
+    private static void addWriter() {
+        System.out.print("Enter writer ID (number): ");
+        int writerId = scanner.nextInt();
+
+        // Check if writer with this ID already exists
+        for (Writer w : writers) {
+            if (Integer.parseInt(w.getName()) == writerId) {
+                System.out.println("Writer with ID " + writerId + " already exists!");
+                return;
+            }
+        }
+
+        System.out.print("Enter writer rate (operations per second, 0 = default): ");
+        int rate = scanner.nextInt();
+
+        Writer writer = new Writer(ticketPool, writerId);
+        writer.setRate(rate);
+        writers.add(writer);
+
+        Thread thread = new Thread(writer, "Writer-" + writerId);
+        threads.add(thread);
+        thread.start();
+
+        System.out.println("Writer " + writerId + " added successfully with rate: " + rate);
+    }
+
+    private static void removeWriter() {
+        if (writers.isEmpty()) {
+            System.out.println("No writers to remove!");
+            return;
+        }
+
+        System.out.println("Current Writers:");
+        listWriters();
+
+        System.out.print("Enter writer ID to remove: ");
+        int writerId = scanner.nextInt();
+
+        Writer writerToRemove = null;
+        Thread threadToRemove = null;
+
+        for (Writer w : writers) {
+            if (Integer.parseInt(w.getName()) == writerId) {
+                writerToRemove = w;
+                break;
+            }
+        }
+
+        if (writerToRemove != null) {
+            writerToRemove.stop();
+            writers.remove(writerToRemove);
+
+            for (Thread t : threads) {
+                if (t.getName().equals("Writer-" + writerId)) {
+                    threadToRemove = t;
+                    break;
+                }
+            }
+
+            if (threadToRemove != null) {
+                threadToRemove.interrupt();
+                threads.remove(threadToRemove);
+            }
+
+            System.out.println("Writer " + writerId + " removed successfully.");
+        } else {
+            System.out.println("Writer with ID " + writerId + " not found!");
+        }
+    }
+
+    private static void listWriters() {
+        if (writers.isEmpty()) {
+            System.out.println("No writers available.");
+            return;
+        }
+
+        System.out.println("Current Writers:");
+        System.out.println("ID\tState\tRate");
+        System.out.println("--\t-----\t----");
+
+        for (Writer w : writers) {
+            System.out.println(w.getName() + "\tRunning\t"+ w.getRate());
+        }
+    }
+
+    private static void setWriterRate() {
+        if (writers.isEmpty()) {
+            System.out.println("No writers available to set rate!");
+            return;
+        }
+
+        System.out.println("Current Writers:");
+        listWriters();
+
+        System.out.print("Enter writer ID to modify rate: ");
+        int writerId = scanner.nextInt();
+
+        Writer writerToModify = null;
+
+        for (Writer w : writers) {
+            if (Integer.parseInt(w.getName()) == writerId) {
+                writerToModify = w;
+                break;
+            }
+        }
+
+        if (writerToModify != null) {
+            System.out.print("Enter new rate (operations per second, 0 = default): ");
+            int newRate = scanner.nextInt();
+            writerToModify.setRate(newRate);
+            System.out.println("Writer " + writerId + " rate updated to " + newRate);
+        } else {
+            System.out.println("Writer with ID " + writerId + " not found!");
+        }
+    }
+
     private static void showPoolStatus() {
         System.out.println("\nTicket Pool Status");
         System.out.println("-----------------");
@@ -579,8 +738,8 @@ public class SimulationManager {
         System.out.println("Producers: " + producers.size());
         System.out.println("Consumers: " + consumers.size());
         System.out.println("Readers: " + readers.size());
+        System.out.println("Writers: " + writers.size());
 
-        // Wait for user to press enter to continue
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
         scanner.nextLine();
@@ -607,6 +766,11 @@ public class SimulationManager {
         // Stop all readers
         for (Reader r : readers) {
             r.stop();
+        }
+
+        // Stop all writers
+        for (Writer w : writers) {
+            w.stop();
         }
 
         // Interrupt all threads
