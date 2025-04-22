@@ -1,5 +1,6 @@
 package com.iit.ticket.writer;
 
+import com.iit.ticket.model.Ticket;
 import com.iit.ticket.pool.TicketPool;
 import com.iit.ticket.util.PoolEntity;
 
@@ -23,8 +24,14 @@ public class Writer implements PoolEntity {
     public void run() {
         try {
             while (running) {
-                // System.out.println("Updating ticket pool.......");
-                ticketPool.getTotalTickets();
+
+                Ticket ticket = ticketPool.purchaseTicket();
+                if (ticket != null) {
+                    // chnage the price
+                    ticket.setTicketPrice(random.nextDouble());
+                    ticketPool.addTicket(ticket);
+                }
+
                 if (rate > 0) {
                     Thread.sleep(1000 / rate);
                 } else {

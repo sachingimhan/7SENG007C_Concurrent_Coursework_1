@@ -21,6 +21,14 @@ public class Ticket {
         return ticketPrice;
     }
 
+    public void setTicketId(int ticketId) {
+        this.ticketId = ticketId;
+    }
+
+    public void setTicketPrice(double ticketPrice) {
+        this.ticketPrice = ticketPrice;
+    }
+
     @Override
     public String toString() {
         return "Ticket{" +

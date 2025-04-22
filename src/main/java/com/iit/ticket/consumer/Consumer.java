@@ -23,7 +23,7 @@ public class Consumer implements PoolEntity {
             while (this.running) {
                 Ticket ticket = ticketPool.purchaseTicket();
                 if (ticket != null) {
-//                    UtilMethods.debug("Consumer " + consumerId + " purchased: " + ticket);
+                    System.out.println(consumerId + " Consumer has purchase the ticket " + ticket.getTicketId());
                 }
                 if (rate > 0) {
                     Thread.sleep(1000 / rate);
