@@ -3,6 +3,7 @@ import com.iit.ticket.pool.BlockingQueueTicketPool;
 import com.iit.ticket.pool.ReentrantLockTicketPool;
 import com.iit.ticket.pool.SynchronizedTicketPool;
 import com.iit.ticket.pool.TicketPool;
+import org.junit.Assert;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -70,9 +71,9 @@ public class TicketPoolTest {
         System.out.println("Sold tickets: " + pool.getSoldTickets());
         System.out.println("Total tickets created: " + pool.getTotalTickets());
 
-        assert pool.getAvailableTickets() == 2 : "Expected 2 available tickets";
-        assert pool.getSoldTickets() == 3 : "Expected 3 sold tickets";
-        assert pool.getTotalTickets() == 5 : "Expected 5 total tickets";
+        Assert.assertEquals(2, pool.getAvailableTickets());
+        Assert.assertEquals(3, pool.getSoldTickets());
+        Assert.assertEquals(5, pool.getTotalTickets());
 
         System.out.println(name + " Pool basic operations passed!");
     }
@@ -156,8 +157,7 @@ public class TicketPoolTest {
         System.out.println("Pool total tickets: " + pool.getTotalTickets());
 
         // Verify that total tickets created equals tickets purchased plus available tickets
-        assert (pool.getSoldTickets() + pool.getAvailableTickets() == pool.getTotalTickets()) :
-                "Data consistency error: sold + available should equal total";
+        Assert.assertEquals(pool.getSoldTickets() + pool.getAvailableTickets(), pool.getTotalTickets());
 
         System.out.println(name + " Pool thread safety test passed!");
     }
